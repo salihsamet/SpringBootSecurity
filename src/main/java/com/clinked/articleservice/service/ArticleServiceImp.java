@@ -24,11 +24,8 @@ public class ArticleServiceImp implements ArticleService{
 
         Page<Article> pagedResult = articleRepository.findAll(paging);
 
-        if(pagedResult.hasContent()) {
-            return pagedResult.getContent();
-        } else {
-            return new ArrayList<Article>();
-        }
+        return pagedResult.hasContent() ? pagedResult.getContent() : new ArrayList<Article>();
+
     }
 
     @Override
@@ -39,7 +36,7 @@ public class ArticleServiceImp implements ArticleService{
     @Override
     public List<Statistics> getStatistics() {
         LocalDate daysAgo = LocalDate.now().minusDays(7);
-        List<Statistics> statistics =  articleRepository.getStatistics(daysAgo);
+        List<Statistics> statistics = articleRepository.getStatistics(daysAgo);
         return statistics;
     }
 

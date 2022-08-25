@@ -27,12 +27,17 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
             AccessDeniedException exc) throws IOException, ServletException {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String errorMessage = null;
         if (auth != null) {
-            errorMessage = "User: " + auth.getName() + " attempted to access the protected URL: " + request.getRequestURI();
-            LOG.warn(errorMessage);
+            LOG.warn("User: " + auth.getName() + " attempted to access the protected URL: " + request.getRequestURI());
         }
-
+        response.setContentType("application/json;charset=UTF-8");
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        ErrorMessage message = new ErrorMessage(
+                HttpServletResponse.SC_UNAUTHORIZED,
+                new Date(),
+                "Access denied",
+                request.getRequestURI());
+        response.getWriter().write(new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(message));
 
     }
 }

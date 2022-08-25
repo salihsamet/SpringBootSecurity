@@ -64,7 +64,9 @@ public class SecurityConfig {
             .antMatchers("/api/user/register").permitAll()
             .antMatchers("/api/articles/admin/statistics").access("hasRole('ADMIN')")
             .anyRequest().authenticated()
-            .and().exceptionHandling().accessDeniedHandler(accessDeniedHandler()).and()
+            .and()
+            .exceptionHandling().accessDeniedHandler(accessDeniedHandler())
+            .and()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         httpSecurity.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);

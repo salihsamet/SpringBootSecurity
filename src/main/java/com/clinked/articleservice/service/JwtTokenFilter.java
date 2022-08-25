@@ -1,5 +1,6 @@
 package com.clinked.articleservice.service;
 
+import com.clinked.articleservice.exception.AccessDeniedException;
 import com.clinked.articleservice.exception.CustomAccessDeniedHandler;
 import com.clinked.articleservice.repository.UserRepository;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -44,23 +45,11 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         }
 
         String token = header.split(" ")[1].trim();
-        try {
-            if (!jwtService.validate(token)){
-                filterChain.doFilter(request, response);
-                return;
-            }
-        } catch (SignatureException e) {
-            LOG.error("Invalid JWT signature: {}", e.getMessage());
-        } catch (MalformedJwtException e) {
-            LOG.error("Invalid JWT token: {}", e.getMessage());
-        } catch (ExpiredJwtException e) {
-            LOG.error("JWT token is expired: {}", e.getMessage());
-        } catch (UnsupportedJwtException e) {
-            LOG.error("JWT token is unsupported: {}", e.getMessage());
-        } catch (IllegalArgumentException e) {
-            LOG.error("JWT claims string is empty: {}", e.getMessage());
-        }
 
+        if (!jwtService.validate(token)){
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         UserDetails userDetails = userRepository.findByUserName(jwtService.getUsername(token)).orElse(null);
 

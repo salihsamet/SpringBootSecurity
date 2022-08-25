@@ -1,9 +1,14 @@
 package com.clinked.articleservice.service;
 
+import com.clinked.articleservice.contoller.ArticleController;
+import com.clinked.articleservice.exception.AccessDeniedException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
@@ -13,11 +18,16 @@ import java.util.stream.Collectors;
 
 @Service
 public class JwtService {
-    private static final int expireInMs = 5 * 60 * 1000;
+
+    public static final Logger LOG = LogManager.getLogger(ArticleController.class);
+
+    @Value("${tokenExpireTimeMS}")
+    private  int expireInMs;
+
+    @Value("${tokenAuthoritiesKey}")
+    private String AUTHORITIES_KEY;
 
     private final static Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-
-    private final static String AUTHORITIES_KEY = "roles";
 
     public String generate(Authentication authentication) {
         String role = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining());
@@ -30,7 +40,12 @@ public class JwtService {
                 .compact();
     }
     public boolean validate(String token){
-        return getUsername(token) != null && isExpired(token);
+        try {
+            return getUsername(token) != null && isExpired(token);
+        }catch (Exception e){
+            LOG.error("Access is denied because of that token is invalid.");
+            throw new AccessDeniedException("dfd");
+        }
     }
 
     public String getUsername(String token) {
@@ -44,6 +59,6 @@ public class JwtService {
     }
 
     private Claims getClaims(String token) {
-        return  Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
 }

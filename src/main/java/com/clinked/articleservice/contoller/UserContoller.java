@@ -5,7 +5,10 @@ import com.clinked.articleservice.models.Statistics;
 import com.clinked.articleservice.models.User;
 import com.clinked.articleservice.service.JwtService;
 import com.clinked.articleservice.dto.UserDto;
+import com.clinked.articleservice.service.JwtTokenFilter;
 import com.clinked.articleservice.service.UserService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +24,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/user")
 public class UserContoller {
+    public static final Logger LOG = LogManager.getLogger(UserContoller.class);
 
     @Autowired
     JwtService jwtService;
@@ -41,6 +45,7 @@ public class UserContoller {
             String jwtToken = jwtService.generate(authentication);
             return ResponseEntity.ok(jwtToken);
         } catch (Exception anyException){
+            LOG.error("An error occurred in login process");
             throw new Exception("An error occurred in login process");
         }
     }
@@ -52,6 +57,7 @@ public class UserContoller {
             userService.createUser(user);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception anyException){
+            LOG.error("An error occurred in registration process");
             throw new Exception("An error occurred in registration process");
         }
     }
