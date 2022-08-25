@@ -7,7 +7,6 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
-
 import java.security.Key;
 import java.util.Date;
 import java.util.stream.Collectors;
@@ -30,7 +29,7 @@ public class JwtService {
                 .signWith(key)
                 .compact();
     }
-    public boolean validate(String token) {
+    public boolean validate(String token){
         return getUsername(token) != null && isExpired(token);
     }
 
@@ -45,6 +44,6 @@ public class JwtService {
     }
 
     private Claims getClaims(String token) {
-        return Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody();
+        return  Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
 }

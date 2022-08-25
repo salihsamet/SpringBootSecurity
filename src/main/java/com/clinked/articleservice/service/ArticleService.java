@@ -2,9 +2,6 @@ package com.clinked.articleservice.service;
 
 import com.clinked.articleservice.models.Article;
 import com.clinked.articleservice.models.Statistics;
-import org.springframework.data.jpa.repository.Query;
-
-import java.time.LocalDate;
 import java.util.List;
 
 public interface ArticleService {
