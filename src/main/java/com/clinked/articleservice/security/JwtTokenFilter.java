@@ -1,12 +1,6 @@
-package com.clinked.articleservice.service;
+package com.clinked.articleservice.security;
 
-import com.clinked.articleservice.exception.AccessDeniedException;
-import com.clinked.articleservice.exception.CustomAccessDeniedHandler;
 import com.clinked.articleservice.repository.UserRepository;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
-import io.jsonwebtoken.security.SignatureException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

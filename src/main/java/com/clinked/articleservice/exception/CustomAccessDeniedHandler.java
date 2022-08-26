@@ -1,5 +1,7 @@
 package com.clinked.articleservice.exception;
 
+import com.clinked.articleservice.models.ApiResponse;
+import com.clinked.articleservice.models.ErrorMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,7 +15,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Date;
 
 
@@ -31,13 +32,13 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
             LOG.warn("User: " + auth.getName() + " attempted to access the protected URL: " + request.getRequestURI());
         }
         response.setContentType("application/json;charset=UTF-8");
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
         ErrorMessage message = new ErrorMessage(
-                HttpServletResponse.SC_UNAUTHORIZED,
                 new Date(),
                 "Access denied",
                 request.getRequestURI());
-        response.getWriter().write(new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(message));
+        response.getWriter().write(new ObjectMapper().writer().withDefaultPrettyPrinter()
+                .writeValueAsString(new ApiResponse(HttpStatus.UNAUTHORIZED.value(), message)));
 
     }
 }

@@ -1,7 +1,7 @@
 package com.clinked.articleservice.config;
 
 import com.clinked.articleservice.exception.CustomAccessDeniedHandler;
-import com.clinked.articleservice.service.JwtTokenFilter;
+import com.clinked.articleservice.security.JwtTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

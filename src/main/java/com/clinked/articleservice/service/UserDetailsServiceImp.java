@@ -11,18 +11,14 @@ import org.springframework.stereotype.Service;
 import static java.lang.String.format;
 
 @Service
-public class UserDetailsServiceImp implements UserDetailsService, UserService {
+public class UserDetailsServiceImp implements UserDetailsService {
 
     @Autowired
     UserRepository userRepository;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
        return userRepository.findByUserName(username).orElseThrow(
                 () -> new UsernameNotFoundException(format("User %s cannot be not found in database", username)));
-    }
-
-    @Override
-    public User createUser(User user) {
-        return userRepository.save(user);
     }
 }

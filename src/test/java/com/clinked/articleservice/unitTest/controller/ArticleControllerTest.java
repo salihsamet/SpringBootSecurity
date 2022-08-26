@@ -1,24 +1,14 @@
 package com.clinked.articleservice.unitTest.controller;
 
-import com.clinked.articleservice.contoller.ArticleController;
 import com.clinked.articleservice.enums.Content;
-import com.clinked.articleservice.enums.Role;
 import com.clinked.articleservice.models.Article;
 import com.clinked.articleservice.models.Statistics;
-import com.clinked.articleservice.models.User;
 import com.clinked.articleservice.service.ArticleService;
-import com.clinked.articleservice.service.JwtService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -26,17 +16,13 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
@@ -51,7 +37,7 @@ public class ArticleControllerTest {
 
     @Test
     @WithMockUser(username = "test_user", password = "test_password", roles = {"USER"})
-     public void getArticlesTest() throws Exception {
+    void getArticlesTest() throws Exception {
         Article article = new Article("author", "title", Content.ART, LocalDate.now());
         List<Article> articles = Arrays.asList(article);
 
@@ -61,17 +47,17 @@ public class ArticleControllerTest {
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .accept(MediaType.APPLICATION_JSON_VALUE))
                         .andExpect(status().isOk())
-                        .andExpect(MockMvcResultMatchers.jsonPath("$.[0]").exists())
-                        .andExpect(MockMvcResultMatchers.jsonPath("$.[0].id").isNotEmpty())
-                        .andExpect(MockMvcResultMatchers.jsonPath("$.[0].author").value(article.getAuthor()))
-                        .andExpect(MockMvcResultMatchers.jsonPath("$.[0].title").value(article.getTitle()))
-                        .andExpect(MockMvcResultMatchers.jsonPath("$.[0].content").value(article.getContent().getValue()))
-                        .andExpect(MockMvcResultMatchers.jsonPath("$.[0].publishDate").value(article.getPublishDate().toString()));
+                        .andExpect(MockMvcResultMatchers.jsonPath("$.data[0]").exists())
+                        .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].id").isNotEmpty())
+                        .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].author").value(article.getAuthor()))
+                        .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].title").value(article.getTitle()))
+                        .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].content").value(article.getContent().getValue()))
+                        .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].publishDate").value(article.getPublishDate().toString()));
     }
 
     @Test
     @WithMockUser(username = "test_user", password = "test_password", roles = {"USER"})
-    public void getArticlesForNoArticleTest() throws Exception {
+    void getArticlesForNoArticleTest() throws Exception {
         Article article = new Article("author", "title", Content.ART, LocalDate.now());
         List<Article> articles = Arrays.asList(article);
 
@@ -81,53 +67,125 @@ public class ArticleControllerTest {
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .accept(MediaType.APPLICATION_JSON_VALUE))
                         .andExpect(status().isOk())
-                        .andExpect(MockMvcResultMatchers.jsonPath("$.[0]").doesNotExist());
+                        .andExpect(MockMvcResultMatchers.jsonPath("$.data[0]").doesNotExist());
     }
 
     @Test
     @WithMockUser(username = "test_user", password = "test_password", roles = {"USER"})
-    public void createArticlesTest() throws Exception {
+    void createArticlesTest() throws Exception {
         Article article = new Article("author", "title", Content.ART, LocalDate.now());
         List<Article> articles = Arrays.asList(article);
 
-        Mockito.when(articleService.createArticle(article)).thenReturn(article);
+        Mockito.when(articleService.createArticle(any(Article.class))).thenReturn(article);
 
         mockMvc.perform(post("/api/articles/create")
-                        .content(asJsonString(article))
+                        .content(Util.asJsonString(article))
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .accept(MediaType.APPLICATION_JSON_VALUE))
-                        .andDo(print())
-                        .andExpect(status().isOk())
-                        .andExpect(MockMvcResultMatchers.jsonPath("$.author").exists());
+                        .andExpect(status().isOk());
     }
+    @Test
+    @WithMockUser(username = "test_user", password = "test_password", roles = {"USER"})
+    void createArticlesWithNullAuthorTest() throws Exception {
+        Article article = new Article(null, "title", Content.ART, LocalDate.now());
+        List<Article> articles = Arrays.asList(article);
 
-    private String asJsonString(final Object obj) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.registerModule(new JavaTimeModule());
-            return mapper.writeValueAsString(obj);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        Mockito.when(articleService.createArticle(any(Article.class))).thenReturn(article);
+
+        mockMvc.perform(post("/api/articles/create")
+                        .content(Util.asJsonString(article))
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isInternalServerError());
+    }
+    @Test
+    @WithMockUser(username = "test_user", password = "test_password", roles = {"USER"})
+    void createArticlesWithNullTitleTest() throws Exception {
+        Article article = new Article("author", null, Content.ART, LocalDate.now());
+        List<Article> articles = Arrays.asList(article);
+
+        Mockito.when(articleService.createArticle(any(Article.class))).thenReturn(article);
+
+        mockMvc.perform(post("/api/articles/create")
+                        .content(Util.asJsonString(article))
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isInternalServerError());
     }
 
     @Test
     @WithMockUser(username = "test_user", password = "test_password", roles = {"USER"})
-    public void getStatisticTest() throws Exception {
-        Article article = new Article("author", "title", Content.ART, LocalDate.now());
-        List<Statistics> a = new ArrayList<>();
-        Mockito.when(articleService.getStatistics()).thenReturn(null);
+    void createArticlesWithExceedTitleTest() throws Exception {
+        Article article = new Article("author",
+                "exceedexceedexceedexceedexceedexceedexceedexceedexceedexceed" +
+                        "exceedexceedexceedexceedexceedexceedexceedexceedexceedexceed", Content.ART, LocalDate.now());
+        List<Article> articles = Arrays.asList(article);
 
-        mockMvc.perform(get("/api/articles//admin/statistics")
+        Mockito.when(articleService.createArticle(any(Article.class))).thenReturn(article);
+
+        mockMvc.perform(post("/api/articles/create")
+                        .content(Util.asJsonString(article))
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .accept(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.[0]").exists())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.[0].id").isNotEmpty())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.[0].author").value(article.getAuthor()));
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    @WithMockUser(username = "test_user", password = "test_password", roles = {"USER"})
+    void createArticlesWithNullContentTest() throws Exception {
+        Article article = new Article("author", "title", null, LocalDate.now());
+        List<Article> articles = Arrays.asList(article);
+
+        Mockito.when(articleService.createArticle(any(Article.class))).thenReturn(article);
+
+        mockMvc.perform(post("/api/articles/create")
+                        .content(Util.asJsonString(article))
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isInternalServerError());
     }
 
 
+    @Test
+    @WithMockUser(username = "test_user", password = "test_password", roles = {"USER"})
+    void createArticlesWithNullPublishDateTest() throws Exception {
+        Article article = new Article("author", "title", Content.ART, null);
+        List<Article> articles = Arrays.asList(article);
+
+        Mockito.when(articleService.createArticle(any(Article.class))).thenReturn(article);
+
+        mockMvc.perform(post("/api/articles/create")
+                        .content(Util.asJsonString(article))
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isInternalServerError());
+    }
+
+
+    @Test
+    @WithMockUser(username = "test_user", password = "test_password", roles = {"ADMIN"})
+    void getStatisticTest() throws Exception {
+        List<Statistics> statistics = new ArrayList<>();
+        Mockito.when(articleService.getStatistics()).thenReturn(statistics);
+
+        mockMvc.perform(get("/api/articles/admin/statistics")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0]").doesNotExist());
+    }
+
+    @Test
+    @WithMockUser(username = "test_user", password = "test_password", roles = {"USER"})
+    void getStatisticForUnauthorizedTest() throws Exception {
+        List<Statistics> statistics = new ArrayList<>();
+        Mockito.when(articleService.getStatistics()).thenReturn(statistics);
+
+        mockMvc.perform(get("/api/articles/admin/statistics")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isUnauthorized());
+    }
 
 
 }

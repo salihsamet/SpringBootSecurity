@@ -1,11 +1,10 @@
 package com.clinked.articleservice.contoller;
 
 import com.clinked.articleservice.mapper.DtoMapper;
-import com.clinked.articleservice.models.Statistics;
+import com.clinked.articleservice.models.ApiResponse;
 import com.clinked.articleservice.models.User;
-import com.clinked.articleservice.service.JwtService;
+import com.clinked.articleservice.security.JwtService;
 import com.clinked.articleservice.dto.UserDto;
-import com.clinked.articleservice.service.JwtTokenFilter;
 import com.clinked.articleservice.service.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,7 +17,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
-import java.util.List;
 
 
 @RestController
@@ -39,11 +37,11 @@ public class UserContoller {
     DtoMapper dtoMapper;
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody @Valid UserDto userDto) throws Exception {
+    public ResponseEntity login(@RequestBody @Valid UserDto userDto) throws Exception {
         try {
             final Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDto.getUsername(), userDto.getPassword()));
             String jwtToken = jwtService.generate(authentication);
-            return ResponseEntity.ok(jwtToken);
+            return ResponseEntity.status(HttpStatus.OK.value()).body(new ApiResponse(HttpStatus.OK.value(), jwtToken));
         } catch (Exception anyException){
             LOG.error("An error occurred in login process");
             throw new Exception("An error occurred in login process");
@@ -51,11 +49,11 @@ public class UserContoller {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Validated  @RequestBody UserDto userDto) throws Exception {
+    public ResponseEntity register(@Validated  @RequestBody UserDto userDto) throws Exception {
         try {
             User user = dtoMapper.convertToUser(userDto);
             userService.createUser(user);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.OK.value()).body(new ApiResponse(HttpStatus.OK.value()));
         } catch (Exception anyException){
             LOG.error("An error occurred in registration process");
             throw new Exception("An error occurred in registration process");

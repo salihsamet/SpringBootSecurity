@@ -1,4 +1,4 @@
-package com.clinked.articleservice.service;
+package com.clinked.articleservice.security;
 
 import com.clinked.articleservice.contoller.ArticleController;
 import com.clinked.articleservice.exception.AccessDeniedException;
@@ -44,7 +44,7 @@ public class JwtService {
             return getUsername(token) != null && isExpired(token);
         }catch (Exception e){
             LOG.error("Access is denied because of that token is invalid.");
-            throw new AccessDeniedException("dfd");
+            throw new AccessDeniedException("Access Denied");
         }
     }
 

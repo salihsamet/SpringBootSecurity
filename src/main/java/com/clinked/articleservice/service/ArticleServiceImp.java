@@ -4,6 +4,7 @@ import com.clinked.articleservice.models.Article;
 import com.clinked.articleservice.models.Statistics;
 import com.clinked.articleservice.repository.ArticleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +19,9 @@ public class ArticleServiceImp implements ArticleService{
 
     @Autowired
     ArticleRepository articleRepository;
+
+    @Value("${articleCountForDays}")
+    private int articleCountForDays;
 
     public List<Article> getArticles(int pageNo, int pageSize, String sortBy, boolean direction){
         Pageable paging = PageRequest.of(pageNo, pageSize, direction ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending());
@@ -35,7 +39,7 @@ public class ArticleServiceImp implements ArticleService{
 
     @Override
     public List<Statistics> getStatistics() {
-        LocalDate daysAgo = LocalDate.now().minusDays(7);
+        LocalDate daysAgo = LocalDate.now().minusDays(articleCountForDays);
         List<Statistics> statistics = articleRepository.getStatistics(daysAgo);
         return statistics;
     }
